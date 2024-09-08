@@ -17,6 +17,8 @@ const Summary: React.FC = () => {
     const [incomes, setIncomes] = useState<Transaction[]>([]);
     const [expenses, setExpenses] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [totalIncomes, setTotalIncomes] = useState<number>(0);
+    const [totalExpenses, setTotalExpenses] = useState<number>(0);
     const [balance, setBalance] = useState<number>(0);
 
     const navigation = useNavigation<SummaryScreenNavigationProp>();
@@ -31,7 +33,12 @@ const Summary: React.FC = () => {
                 setIncomes(fetchedIncomes);
                 setExpenses(fetchedExpenses);
 
-                calculateBalance(fetchedIncomes, fetchedExpenses);
+                const totalIncomeAmount = fetchedIncomes.reduce((sum: number, item: Transaction) => sum + item.value, 0);
+                const totalExpenseAmount = fetchedExpenses.reduce((sum: number, item: Transaction) => sum + item.value, 0);
+                
+                setTotalIncomes(totalIncomeAmount);
+                setTotalExpenses(totalExpenseAmount);
+                setBalance(totalIncomeAmount - totalExpenseAmount);
             } catch (error) {
                 console.error('Failed to fetch data:', error);
             } finally {
@@ -42,12 +49,6 @@ const Summary: React.FC = () => {
         fetchData();
     }, []);
 
-    const calculateBalance = (incomes: Transaction[], expenses: Transaction[]) => {
-        const totalIncomes = incomes.reduce((sum, item) => sum + item.value, 0);
-        const totalExpenses = expenses.reduce((sum, item) => sum + item.value, 0);
-        setBalance(totalIncomes - totalExpenses);
-    };
-
     const renderItem = ({ item }: { item: Transaction }) => (
         <View style={styles.item}>
             <Text>{item.name}</Text>
@@ -57,37 +58,33 @@ const Summary: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Monthly Summary</Text>
+            <View style={styles.content}>
+                <Text style={styles.title}>Monthly Summary</Text>
 
-            {loading ? (
-                <ActivityIndicator size="large" color="#0000ff" />
-            ) : (
-                <View>
-                    <Text style={styles.subtitle}>Incomes</Text>
-                    <FlatList
-                        data={incomes}
-                        renderItem={renderItem}
-                        keyExtractor={(item) => `income-${item.id}`}
-                    />
+                {loading ? (
+                    <ActivityIndicator size="large" color="#0000ff" />
+                ) : (
+                    <View>
+                        <View style={styles.summaryBox}>
+                            <Text style={styles.subtitle}>Total Incomes</Text>
+                            <Text style={styles.totalAmount}>${totalIncomes.toFixed(2)}</Text>
 
-                    <Text style={styles.subtitle}>Expenses</Text>
-                    <FlatList
-                        data={expenses}
-                        renderItem={renderItem}
-                        keyExtractor={(item) => `expense-${item.id}`}
-                    />
-                </View>
-            )}
+                            <Text style={styles.subtitle}>Total Expenses</Text>
+                            <Text style={styles.totalAmount}>${totalExpenses.toFixed(2)}</Text>
+                        </View>
 
-            <TouchableOpacity
-                style={[styles.balanceBox, { backgroundColor: balance >= 0 ? 'green' : 'red' }]}
-                onPress={() => navigation.navigate('ViewExpenseIncome')}
-            >
-                <Text style={styles.balanceText}>
-                    Total Balance: ${balance.toFixed(2)}
-                </Text>
-            </TouchableOpacity>
-
+                        <TouchableOpacity
+                            style={[styles.balanceBox, { backgroundColor: balance >= 0 ? 'green' : 'red' }]}
+                            onPress={() => navigation.navigate('ViewExpenseIncome')}
+                        >
+                            <Text style={styles.balanceText}>
+                                Total Balance: ${balance.toFixed(2)}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </View>
+            
             <View style={styles.buttonContainer}>
                 <TouchableOpacity
                     style={styles.button}
@@ -110,6 +107,9 @@ const Summary: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    content: {
+        flex: 1,
         padding: 16,
     },
     title: {
@@ -121,6 +121,14 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
         marginVertical: 8,
+    },
+    summaryBox: {
+        marginBottom: 16,
+    },
+    totalAmount: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginBottom: 16,
     },
     item: {
         padding: 16,
@@ -143,10 +151,10 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        position: 'absolute',
-        bottom: 20,
-        left: 16,
-        right: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderTopWidth: 1,
+        borderTopColor: '#ccc',
     },
     button: {
         backgroundColor: '#007bff',

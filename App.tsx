@@ -8,11 +8,11 @@ import Register from './Screens/Register';
 import ViewExpenseIncome from './Screens/ViewExpenseIncome';
 import EditExpenseIncome from './Screens/EditExpenseIncome';
 import CreateExpenseIncome from './Screens/CreateExpenseIncome';
-import { StackParamList } from './types'; 
+import { StackParamList } from './types';
 import { getDBConnection, createIncomesTable, createExpensesTable, createUsersTable} from './db.service';
-
+ 
 const Stack = createStackNavigator<StackParamList>();
-
+ 
 const headerOptions: StackNavigationOptions = {
   headerStyle: {
     backgroundColor: '#42f584',
@@ -23,8 +23,8 @@ const headerOptions: StackNavigationOptions = {
   },
   headerTitleAlign: 'center',
 };
-
-
+ 
+ 
 const App = () => {
   return (
     <NavigationContainer>
@@ -63,5 +63,5 @@ const App = () => {
     </NavigationContainer>
   );
 };
-
+ 
 export default App;

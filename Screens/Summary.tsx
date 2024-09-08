@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { getDBConnection, getIncomes, getExpenses } from '../db.service';
 import { StackParamList } from '../types';
-
+ 
 type SummaryScreenNavigationProp = StackNavigationProp<StackParamList, 'CreateExpenseIncome'>;
-
+ 
 type Transaction = {
     id: number;
     name: string;
     value: number;
 };
-
+ 
 const Summary: React.FC = () => {
     const [incomes, setIncomes] = useState<Transaction[]>([]);
     const [expenses, setExpenses] = useState<Transaction[]>([]);
@@ -20,47 +20,43 @@ const Summary: React.FC = () => {
     const [totalIncomes, setTotalIncomes] = useState<number>(0);
     const [totalExpenses, setTotalExpenses] = useState<number>(0);
     const [balance, setBalance] = useState<number>(0);
-
+ 
     const navigation = useNavigation<SummaryScreenNavigationProp>();
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const db = await getDBConnection();
-                const fetchedIncomes = await getIncomes(db);
-                const fetchedExpenses = await getExpenses(db);
-
-                setIncomes(fetchedIncomes);
-                setExpenses(fetchedExpenses);
-
-                const totalIncomeAmount = fetchedIncomes.reduce((sum: number, item: Transaction) => sum + item.value, 0);
-                const totalExpenseAmount = fetchedExpenses.reduce((sum: number, item: Transaction) => sum + item.value, 0);
-                
-                setTotalIncomes(totalIncomeAmount);
-                setTotalExpenses(totalExpenseAmount);
-                setBalance(totalIncomeAmount - totalExpenseAmount);
-            } catch (error) {
-                console.error('Failed to fetch data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
+    const isFocused = useIsFocused(); // Hook to determine if the screen is focused
+ 
+    const fetchData = useCallback(async () => {
+        try {
+            const db = await getDBConnection();
+            const fetchedIncomes = await getIncomes(db);
+            const fetchedExpenses = await getExpenses(db);
+ 
+            setIncomes(fetchedIncomes);
+            setExpenses(fetchedExpenses);
+ 
+            const totalIncomeAmount = fetchedIncomes.reduce((sum: number, item: Transaction) => sum + item.value, 0);
+            const totalExpenseAmount = fetchedExpenses.reduce((sum: number, item: Transaction) => sum + item.value, 0);
+            
+            setTotalIncomes(totalIncomeAmount);
+            setTotalExpenses(totalExpenseAmount);
+            setBalance(totalIncomeAmount - totalExpenseAmount);
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+        } finally {
+            setLoading(false);
+        }
     }, []);
-
-    const renderItem = ({ item }: { item: Transaction }) => (
-        <View style={styles.item}>
-            <Text>{item.name}</Text>
-            <Text>${item.value.toFixed(2)}</Text>
-        </View>
-    );
-
+ 
+    useEffect(() => {
+        if (isFocused) {
+            fetchData();
+        }
+    }, [isFocused, fetchData]);
+ 
     return (
         <View style={styles.container}>
             <View style={styles.content}>
                 <Text style={styles.title}>Monthly Summary</Text>
-
+ 
                 {loading ? (
                     <ActivityIndicator size="large" color="#0000ff" />
                 ) : (
@@ -68,11 +64,11 @@ const Summary: React.FC = () => {
                         <View style={styles.summaryBox}>
                             <Text style={styles.subtitle}>Total Incomes</Text>
                             <Text style={styles.totalAmount}>${totalIncomes.toFixed(2)}</Text>
-
+ 
                             <Text style={styles.subtitle}>Total Expenses</Text>
                             <Text style={styles.totalAmount}>${totalExpenses.toFixed(2)}</Text>
                         </View>
-
+ 
                         <TouchableOpacity
                             style={[styles.balanceBox, { backgroundColor: balance >= 0 ? 'green' : 'red' }]}
                             onPress={() => navigation.navigate('ViewExpenseIncome')}
@@ -103,7 +99,7 @@ const Summary: React.FC = () => {
         </View>
     );
 };
-
+ 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -170,5 +166,5 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 });
-
+ 
 export default Summary;

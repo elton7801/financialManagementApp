@@ -1,9 +1,9 @@
 import {SQLiteDatabase, enablePromise, openDatabase} from 'react-native-sqlite-storage';
-
+ 
 const databaseName = 'FinancialDb';
-
+ 
 enablePromise(true);
-
+ 
 export const getDBConnection = async() => {
     return openDatabase(
         {name: `${databaseName}`},
@@ -11,30 +11,45 @@ export const getDBConnection = async() => {
         errorCallback,
     );
 }
-
-
+ 
 export const createIncomesTable = async (db: SQLiteDatabase) => {
-  try {
-      const query = 'CREATE TABLE IF NOT EXISTS Incomes(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(20), value INTEGER)';
-      await db.executeSql(query);
-      console.log('Incomes table created successfully');
-  } catch (error) {
-      console.error('Error creating Incomes table:', error);
-      throw Error('Failed to create Incomes table');
-  }
-};
-
-
-export const createExpensesTable = async( db: SQLiteDatabase ) => {
-    try{
-        const query = 'CREATE TABLE IF NOT EXISTS Expenses(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(20), value INTEGER)';
+    try {
+        const query = `
+            CREATE TABLE IF NOT EXISTS Incomes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(20),
+                value INTEGER,
+                date TEXT
+            )
+        `;
         await db.executeSql(query);
-      } catch (error) {
-        console.error(error);
-        throw Error('Failed to create table !!!');
-      }
-}
-
+        console.log('Incomes table created successfully');
+    } catch (error) {
+        console.error('Error creating Incomes table:', error);
+        throw Error('Failed to create Incomes table');
+    }
+};
+ 
+export const createExpensesTable = async (db: SQLiteDatabase) => {
+    try {
+        const query = `
+            CREATE TABLE IF NOT EXISTS Expenses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(20),
+                value INTEGER,
+                date TEXT
+            )
+        `;
+        await db.executeSql(query);
+        console.log('Expenses table created successfully');
+    } catch (error) {
+        console.error('Error creating Expenses table:', error);
+        throw Error('Failed to create Expenses table');
+    }
+};
+ 
+  
+ 
 export const createUsersTable = async( db: SQLiteDatabase ) => {
     try{
         const query = 'CREATE TABLE IF NOT EXISTS User(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(20), email VARCHAR(20), state VARCHAR(20))';
@@ -44,145 +59,162 @@ export const createUsersTable = async( db: SQLiteDatabase ) => {
         throw Error('Failed to create table !!!');
       }
 }
-
-export const getIncomes = async( db: SQLiteDatabase ): Promise<any> => {
+ 
+export const getIncomes = async(db: SQLiteDatabase): Promise<any> => {
     try{
-        const IncomesData : any = [];
+        const IncomesData: any = [];
         const query = `SELECT * FROM Incomes ORDER BY name`;
         const results = await db.executeSql(query);
         results.forEach(result => {
-            (result.rows.raw()).forEach(( item:any ) => {
+            (result.rows.raw()).forEach((item: any) => {
                 IncomesData.push(item);
             })
-          });
+        });
         return IncomesData;
-      } catch (error) {
+    } catch (error) {
         console.error(error);
         throw Error('Failed to get Incomes !!!');
-      }
+    }
 }
-
-export const getExpenses = async( db: SQLiteDatabase ): Promise<any> => {
+ 
+export const getExpenses = async(db: SQLiteDatabase): Promise<any> => {
     try{
-        const ExpensesData : any = [];
+        const ExpensesData: any = [];
         const query = `SELECT * FROM Expenses ORDER BY name`;
         const results = await db.executeSql(query);
         results.forEach(result => {
-            (result.rows.raw()).forEach(( item:any ) => {
+            (result.rows.raw()).forEach((item: any) => {
                 ExpensesData.push(item);
             })
-          });
+        });
         return ExpensesData;
-      } catch (error) {
-        console.error(error);
-        throw Error('Failed to get Expenses !!!');
-      }
-}
-
-export const getIncomesById = async( db: SQLiteDatabase, IncomesId: string ): Promise<any> => {
-    try{
-        const IncomesData : any = [];
-        const query = `SELECT * FROM Incomes WHERE id=?`;
-        const results = await db.executeSql(query,[IncomesId]);
-        return results[0].rows.item(0)
-      } catch (error) {
-        console.error(error);
-        throw Error('Failed to get Incomes !!!');
-      }
-}
-
-export const getExpensesById = async( db: SQLiteDatabase, ExpensesId: string ): Promise<any> => {
-    try{
-        const ExpensesData : any = [];
-        const query = `SELECT * FROM Expenses WHERE id=?`;
-        const results = await db.executeSql(query,[ExpensesId]);
-        return results[0].rows.item(0)
-      } catch (error) {
-        console.error(error);
-        throw Error('Failed to get Expenses !!!');
-      }
-}
-
-
-export const createIncomes = async( 
-        db: SQLiteDatabase,
-        name: string,
-        value : string
-    ) => {
-    try{
-        const query = 'INSERT INTO Incomes(name,value) VALUES(?,?)';
-        const parameters = [name,value]
-        await db.executeSql(query,parameters);
-      } catch (error) {
-        console.error(error);
-        throw Error('Failed to create Incomes !!!');
-      }
-}
-
-export const createExpenses = async( 
-    db: SQLiteDatabase,
-    name: string,
-    value : string
-) => {
-try{
-    const query = 'INSERT INTO Expenses(name,value) VALUES(?,?)';
-    const parameters = [name,value]
-    await db.executeSql(query,parameters);
-  } catch (error) {
-    console.error(error);
-    throw Error('Failed to create Expenses !!!');
-  }
-}
-
-export const updateIncomes = async( 
-    db: SQLiteDatabase,
-    name: string,
-    value : string,
-    IncomesID: string
-) => {
-try{
-    const query = 'UPDATE Incomes SET name=?,value=? WHERE id=?';
-    const parameters = [name,value, IncomesID]
-    await db.executeSql(query,parameters);
-  } catch (error) {
-    console.error(error);
-    throw Error('Failed to update Incomes !!!');
-  }
-}
-
-export const updateExpenses = async( 
-    db: SQLiteDatabase,
-    name: string,
-    value : string,
-    ExpensesID: string
-) => {
-try{
-    const query = 'UPDATE Expenses SET name=?,value=? WHERE id=?';
-    const parameters = [name,value, ExpensesID]
-    await db.executeSql(query,parameters);
-  } catch (error) {
-    console.error(error);
-    throw Error('Failed to update Expenses !!!');
-  }
-}
-
-export const deleteExpenses = async( 
-    db: SQLiteDatabase,
-    ExpensesId: string
-    ) => {
-    try{
-        const query = 'DELETE FROM Expenses WHERE id = ?' ;
-        await db.executeSql(query,[ExpensesId]);
     } catch (error) {
         console.error(error);
-        throw Error('Failed to delete Expenses !!!');
+        throw Error('Failed to get Expenses !!!');
     }
 }
-
+ 
+ 
+export const getIncomeById = async (db: SQLiteDatabase, id: number) => {
+  return new Promise<any>((resolve, reject) => {
+      db.transaction(tx => {
+          tx.executeSql(
+              'SELECT * FROM incomes WHERE id = ?',
+              [id],
+              (_, result) => {
+                  if (result.rows.length > 0) {
+                      resolve(result.rows.item(0));
+                  } else {
+                      resolve(null);
+                  }
+              },
+              (_, error) => reject(error)
+          );
+      });
+  });
+};
+ 
+export const getExpenseById = async (db: SQLiteDatabase, id: number) => {
+  return new Promise<any>((resolve, reject) => {
+      db.transaction(tx => {
+          tx.executeSql(
+              'SELECT * FROM expenses WHERE id = ?',
+              [id],
+              (_, result) => {
+                  if (result.rows.length > 0) {
+                      resolve(result.rows.item(0));
+                  } else {
+                      resolve(null);
+                  }
+              },
+              (_, error) => reject(error)
+          );
+      });
+  });
+};
+ 
+ 
+export const createIncomes = async (db: SQLiteDatabase, name: string, value: string, date: string) => {
+    try {
+        const query = 'INSERT INTO Incomes(name, value, date) VALUES (?, ?, ?)';
+        await db.executeSql(query, [name, value, date]);
+    } catch (error) {
+        console.error('Failed to create income:', error);
+        throw Error('Failed to create income');
+    }
+};
+ 
+export const createExpenses = async (db: SQLiteDatabase, name: string, value: string, date: string) => {
+    try {
+        const query = 'INSERT INTO Expenses(name, value, date) VALUES (?, ?, ?)';
+        await db.executeSql(query, [name, value, date]);
+    } catch (error) {
+        console.error('Failed to create expense:', error);
+        throw Error('Failed to create expense');
+    }
+};
+ 
+ 
+ 
+ 
+export const updateIncome = async (db: SQLiteDatabase, id: number, name: string, value: number, date: string) => {
+    return new Promise<void>((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                'UPDATE Incomes SET name = ?, value = ?, date = ? WHERE id = ?',
+                [name, value, date, id],
+                () => resolve(),
+                (_, error) => reject(error)
+            );
+        });
+    });
+  };
+  
+  export const updateExpense = async (db: SQLiteDatabase, id: number, name: string, value: number, date: string) => {
+    return new Promise<void>((resolve, reject) => {
+        db.transaction(tx => {
+            tx.executeSql(
+                'UPDATE Expenses SET name = ?, value = ?, date = ? WHERE id = ?',
+                [name, value, date, id],
+                () => resolve(),
+                (_, error) => reject(error)
+            );
+        });
+    });
+  };
+  
+ 
+export const deleteIncome = async (db: SQLiteDatabase, id: number) => {
+  return new Promise<void>((resolve, reject) => {
+      db.transaction(tx => {
+          tx.executeSql(
+              'DELETE FROM incomes WHERE id = ?',
+              [id],
+              () => resolve(),
+              (_, error) => reject(error)
+          );
+      });
+  });
+};
+ 
+export const deleteExpense = async (db: SQLiteDatabase, id: number) => {
+  return new Promise<void>((resolve, reject) => {
+      db.transaction(tx => {
+          tx.executeSql(
+              'DELETE FROM expenses WHERE id = ?',
+              [id],
+              () => resolve(),
+              (_, error) => reject(error)
+          );
+      });
+  });
+};
+ 
 const openCallback = () => {
     console.log('database open success');
 }
-
+ 
 const errorCallback = (err: any) => {
     console.log('Error in opening the database: ' + err);
 }
+ 

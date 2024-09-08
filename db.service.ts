@@ -24,23 +24,6 @@ export const createIncomesTable = async (db: SQLiteDatabase) => {
   }
 };
 
-export const listTables = async (db: SQLiteDatabase) => {
-  try {
-      const query = `SELECT name FROM sqlite_master WHERE type='table';`;
-      const results = await db.executeSql(query);
-      results.forEach(result => {
-          (result.rows.raw()).forEach((item: any) => {
-              console.log('Table:', item.name);
-          });
-      });
-  } catch (error: unknown) {
-      if (error instanceof Error) {
-          console.error('Error listing tables:', error.message);
-      } else {
-          console.error('Unexpected error:', error);
-      }
-  }
-};
 
 export const createExpensesTable = async( db: SQLiteDatabase ) => {
     try{

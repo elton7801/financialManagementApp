@@ -9,7 +9,7 @@ import ViewExpenseIncome from './Screens/ViewExpenseIncome';
 import EditExpenseIncome from './Screens/EditExpenseIncome';
 import CreateExpenseIncome from './Screens/CreateExpenseIncome';
 import { StackParamList } from './types'; 
-import { getDBConnection, createIncomesTable, createExpensesTable, createUsersTable, listTables } from './db.service';
+import { getDBConnection, createIncomesTable, createExpensesTable, createUsersTable} from './db.service';
 
 const Stack = createStackNavigator<StackParamList>();
 
@@ -24,30 +24,6 @@ const headerOptions: StackNavigationOptions = {
   headerTitleAlign: 'center',
 };
 
-
-const initializeDatabase = async () => {
-  try {
-      const db = await getDBConnection();
-
-      // Create tables
-      await createIncomesTable(db);
-      await createExpensesTable(db);
-      await createUsersTable(db);
-
-      // Verify table creation
-      await listTables(db);
-
-      // Now you can perform other operations like querying
-  } catch (error: unknown) {
-      if (error instanceof Error) {
-          console.error('Database initialization error:', error.message);
-      } else {
-          console.error('Unexpected error:', error);
-      }
-  }
-};
-
-initializeDatabase();
 
 const App = () => {
   return (

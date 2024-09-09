@@ -49,21 +49,56 @@ export const createExpensesTable = async (db: SQLiteDatabase) => {
 };
  
   
- 
-export const createUsersTable = async( db: SQLiteDatabase ) => {
-    try{
-        const query = 'CREATE TABLE IF NOT EXISTS User(id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(20), email VARCHAR(20), state VARCHAR(20))';
-        await db.executeSql(query);
-      } catch (error) {
-        console.error(error);
+export const createUsersTable = async (db: SQLiteDatabase) => {
+    try {
+      const query = `CREATE TABLE IF NOT EXISTS User (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        dateOfBirth TEXT,
+        phoneNumber TEXT,
+        address TEXT
+      )`;
+      await db.executeSql(query);
+      console.log('User table created successfully');
+    } catch (error) {
+      console.error('Error creating Users table:', error);
         throw Error('Failed to create table !!!');
       }
 }
+
+export const createUser = async (db: SQLiteDatabase, username: string, email: string, password: string, dob: string, phoneNumber: string, address: string) => {
+    try {
+      const query = 'INSERT INTO User (username, email, password, dateOfBirth, phoneNumber, address) VALUES (?, ?, ?, ?, ?, ?)';
+      await db.executeSql(query, [username, email, password, dob, phoneNumber, address]);
+      console.log('User created successfully');
+    } catch (error) {
+      console.error('Failed to create user:', error);
+      throw new Error('Failed to create user');
+    }
+  };
+  
+  export const getUserByEmailAndPassword = async (db: SQLiteDatabase, email: string, password: string): Promise<any> => {
+    try {
+      const query = 'SELECT * FROM User WHERE email = ? AND password = ?';
+      const result = await db.executeSql(query, [email, password]);
+      
+      if (result[0].rows.length > 0) {
+        return result[0].rows.item(0);
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('Failed to retrieve user:', error);
+      throw new Error('Failed to retrieve user');
+    }
+  };
  
 export const getIncomes = async(db: SQLiteDatabase): Promise<any> => {
     try{
         const IncomesData: any = [];
-        const query = `SELECT * FROM Incomes ORDER BY name`;
+        const query = "SELECT * FROM Incomes ORDER BY name";
         const results = await db.executeSql(query);
         results.forEach(result => {
             (result.rows.raw()).forEach((item: any) => {
@@ -80,7 +115,7 @@ export const getIncomes = async(db: SQLiteDatabase): Promise<any> => {
 export const getExpenses = async(db: SQLiteDatabase): Promise<any> => {
     try{
         const ExpensesData: any = [];
-        const query = `SELECT * FROM Expenses ORDER BY name`;
+        const query = "SELECT * FROM Expenses ORDER BY name";
         const results = await db.executeSql(query);
         results.forEach(result => {
             (result.rows.raw()).forEach((item: any) => {
@@ -217,4 +252,3 @@ const openCallback = () => {
 const errorCallback = (err: any) => {
     console.log('Error in opening the database: ' + err);
 }
- 

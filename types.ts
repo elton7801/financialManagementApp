@@ -2,7 +2,7 @@ export type StackParamList = {
   Summary: undefined;
   Login: undefined;
   Register: undefined;
-  CreateExpenseIncome: { type: string };
+  CreateExpenseIncome: { type: 'expense' | 'income' };
   ViewExpenseIncome: undefined; // No params for this screen
   EditExpenseIncome: {
   type: 'income' | 'expense';

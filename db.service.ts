@@ -4,13 +4,23 @@ const databaseName = 'FinancialDb';
  
 enablePromise(true);
  
-export const getDBConnection = async() => {
+/*export const getDBConnection = async() => {
     return openDatabase(
         {name: `${databaseName}`},
         openCallback,
         errorCallback,
     );
-}
+}*/
+export const getDBConnection = async () => {
+    const db = await openDatabase(
+        {name: `${databaseName}`},
+        openCallback,
+        errorCallback,
+    );
+    await createIncomesTable(db);
+    await createExpensesTable(db);
+    return db;
+};
  
 export const createIncomesTable = async (db: SQLiteDatabase) => {
     try {
@@ -48,6 +58,7 @@ export const createExpensesTable = async (db: SQLiteDatabase) => {
     }
 };
  
+
   
 export const createUsersTable = async (db: SQLiteDatabase) => {
     try {
@@ -189,8 +200,7 @@ export const createExpenses = async (db: SQLiteDatabase, name: string, value: st
     }
 };
  
- 
- 
+
  
 export const updateIncome = async (db: SQLiteDatabase, id: number, name: string, value: number, date: string) => {
     return new Promise<void>((resolve, reject) => {

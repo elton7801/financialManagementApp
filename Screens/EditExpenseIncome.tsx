@@ -5,11 +5,13 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../types';
 import { getDBConnection, updateExpense, updateIncome, getExpenseById, getIncomeById } from '../db.service';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useUser } from '../UserContext';
  
 type EditExpenseIncomeNavigationProp = StackNavigationProp<StackParamList, 'EditExpenseIncome'>;
 type EditExpenseIncomeRouteProp = RouteProp<StackParamList, 'EditExpenseIncome'>;
  
 const EditExpenseIncome = ({ route }: { route: EditExpenseIncomeRouteProp }) => {
+    const { email } = useUser(); 
     const [name, setName] = useState('');
     const [value, setValue] = useState('');
     const [date, setDate] = useState(new Date()); // Initialize with current date
@@ -23,9 +25,9 @@ const EditExpenseIncome = ({ route }: { route: EditExpenseIncomeRouteProp }) => 
                 const db = await getDBConnection();
                 let item;
                 if (type === 'expense') {
-                    item = await getExpenseById(db, id);
+                    item = await getExpenseById(db, id,email);
                 } else if (type === 'income') {
-                    item = await getIncomeById(db, id);
+                    item = await getIncomeById(db, id,email);
                 }
  
                 if (item) {
@@ -69,9 +71,9 @@ const EditExpenseIncome = ({ route }: { route: EditExpenseIncomeRouteProp }) => 
             const db = await getDBConnection();
             const formattedDate = date.toISOString().split('T')[0]; // Format date to YYYY-MM-DD
             if (type === 'expense') {
-                await updateExpense(db, id, name, parsedValue, formattedDate);
+                await updateExpense(db, id, name,email, parsedValue, formattedDate);
             } else if (type === 'income') {
-                await updateIncome(db, id, name, parsedValue, formattedDate);
+                await updateIncome(db, id, name,email, parsedValue, formattedDate);
             }
             Alert.alert('Success', 'Record updated successfully!');
             navigation.goBack(); // Navigate back to the previous screen

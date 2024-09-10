@@ -1,36 +1,37 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../types';
 import { getDBConnection, createUser } from '../db.service';
-import Login from './Login';
-import Summary from './Summary';
-import ViewExpenseIncome from './ViewExpenseIncome';
-import EditExpenseIncome from './EditExpenseIncome';
-import CreateExpenseIncome from './CreateExpenseIncome';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-const Drawer = createDrawerNavigator<StackParamList>();
+type RegisterScreenProp = StackNavigationProp<StackParamList, 'Register'>;
 
-type RegisterScreenProp = NativeStackNavigationProp<StackParamList, 'Register'>;
-
-const Register = ({ navigation }: { navigation: RegisterScreenProp }) => {
+const Register: React.FC<{ navigation: RegisterScreenProp }> = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [dob, setDob] = useState(''); 
-  const [phoneNumber, setPhoneNumber] = useState(''); 
-  const [address, setAddress] = useState(''); 
+  const [dob, setDob] = useState(new Date());
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [address, setAddress] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
   const handleRegister = async () => {
     if (!username || !email || !password || !dob || !phoneNumber || !address) {
       Alert.alert('Error', 'All fields are required.');
       return;
     }
 
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Error', 'Please enter a valid email address.');
+      return;
+    }
+
     try {
       const db = await getDBConnection();
-      await createUser(db, username, email, password, dob, phoneNumber, address);
-
+      await createUser(db, username, email, password, dob.toISOString().split('T')[0], phoneNumber, address);
       Alert.alert('Success', 'Account created successfully');
       navigation.navigate('Login');
     } catch (error) {
@@ -39,62 +40,78 @@ const Register = ({ navigation }: { navigation: RegisterScreenProp }) => {
     }
   };
 
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    const currentDate = selectedDate || dob;
+    setShowDatePicker(false);
+    setDob(currentDate);
+  };
+
   return (
-    <Drawer.Navigator>
-      <Drawer.Screen name="Summary" component={Summary} />
-      <Drawer.Screen name="ViewExpenseIncome" component={ViewExpenseIncome} />
-      <Drawer.Screen name="EditExpenseIncome" component={EditExpenseIncome} />
-      <Drawer.Screen name="CreateExpenseIncome" component={CreateExpenseIncome} />
-      <Drawer.Screen name="Register">
-        {() => (
-          <View style={styles.container}>
-            <Text style={styles.title}>Register</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Username"
-              value={username}
-              onChangeText={setUsername}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Date of Birth"
-              value={dob}
-              onChangeText={setDob}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Phone Number"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              keyboardType="phone-pad"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Address"
-              value={address}
-              onChangeText={setAddress}
-            />
-            <Button title="Register" onPress={handleRegister} />
-            <Button title="Back to Login" onPress={() => navigation.navigate('Login')} />
-          </View>
-        )}
-      </Drawer.Screen>
-    </Drawer.Navigator>
+    <View style={styles.container}>
+      <Text style={styles.title}>Register</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+      <View style={styles.dateInputContainer}>
+        <TextInput
+          style={styles.dateInput}
+          placeholder="Date of Birth"
+          value={dob.toISOString().split('T')[0]}
+          editable={false}
+        />
+        <TouchableOpacity style={styles.dateButton} onPress={() => setShowDatePicker(true)}>
+          <Text style={styles.dateButtonText}>Select</Text>
+        </TouchableOpacity>
+      </View>
+      {showDatePicker && (
+        <DateTimePicker
+          value={dob}
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
+          style={styles.datePicker}
+        />
+      )}
+      <TextInput
+        style={styles.input}
+        placeholder="Phone Number"
+        value={phoneNumber}
+        onChangeText={setPhoneNumber}
+        keyboardType="phone-pad"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Address"
+        value={address}
+        onChangeText={setAddress}
+      />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+          <Text style={styles.registerButtonText}>Register</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.loginButtonText}>Back to Login</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 
@@ -116,6 +133,69 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
+  },
+  dateInputContainer: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  dateInput: {
+    flex: 1,
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    marginRight: 10,
+  },
+  dateButton: {
+    height: 40,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+  },
+  dateButtonText: {
+    color: '#007bff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  datePicker: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  buttonContainer: {
+    width: '100%',
+  },
+  registerButton: {
+    height: 50,
+    backgroundColor: '#28a745',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    width: '100%',
+  },
+  registerButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  loginButton: {
+    height: 50,
+    backgroundColor: '#007bff',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  loginButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

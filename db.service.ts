@@ -3,7 +3,7 @@ import {SQLiteDatabase, enablePromise, openDatabase} from 'react-native-sqlite-s
 const databaseName = 'FinancialDb';
  
 enablePromise(true);
- 
+
 /*export const getDBConnection = async() => {
     return openDatabase(
         {name: `${databaseName}`},
@@ -19,6 +19,7 @@ export const getDBConnection = async () => {
     );
     await createIncomesTable(db);
     await createExpensesTable(db);
+    await createUsersTable(db);
     return db;
 };
  
@@ -106,7 +107,7 @@ export const createUser = async (db: SQLiteDatabase, username: string, email: st
     }
   };
  
-export const getIncomes = async(db: SQLiteDatabase): Promise<any> => {
+export const getIncomes = async(db: SQLiteDatabase,email:string): Promise<any> => {
     try{
         const IncomesData: any = [];
         const query = "SELECT * FROM Incomes ORDER BY name";
@@ -123,7 +124,7 @@ export const getIncomes = async(db: SQLiteDatabase): Promise<any> => {
     }
 }
  
-export const getExpenses = async(db: SQLiteDatabase): Promise<any> => {
+export const getExpenses = async(db: SQLiteDatabase,email:string): Promise<any> => {
     try{
         const ExpensesData: any = [];
         const query = "SELECT * FROM Expenses ORDER BY name";
@@ -141,7 +142,7 @@ export const getExpenses = async(db: SQLiteDatabase): Promise<any> => {
 }
  
  
-export const getIncomeById = async (db: SQLiteDatabase, id: number) => {
+export const getIncomeById = async (db: SQLiteDatabase, id: number,email:string) => {
   return new Promise<any>((resolve, reject) => {
       db.transaction(tx => {
           tx.executeSql(
@@ -160,7 +161,7 @@ export const getIncomeById = async (db: SQLiteDatabase, id: number) => {
   });
 };
  
-export const getExpenseById = async (db: SQLiteDatabase, id: number) => {
+export const getExpenseById = async (db: SQLiteDatabase, id: number,email:string) => {
   return new Promise<any>((resolve, reject) => {
       db.transaction(tx => {
           tx.executeSql(
@@ -180,7 +181,7 @@ export const getExpenseById = async (db: SQLiteDatabase, id: number) => {
 };
  
  
-export const createIncomes = async (db: SQLiteDatabase, name: string, value: string, date: string) => {
+export const createIncomes = async (db: SQLiteDatabase, name: string,email:string, value: string, date: string) => {
     try {
         const query = 'INSERT INTO Incomes(name, value, date) VALUES (?, ?, ?)';
         await db.executeSql(query, [name, value, date]);
@@ -190,7 +191,7 @@ export const createIncomes = async (db: SQLiteDatabase, name: string, value: str
     }
 };
  
-export const createExpenses = async (db: SQLiteDatabase, name: string, value: string, date: string) => {
+export const createExpenses = async (db: SQLiteDatabase, name: string,email:string, value: string, date: string) => {
     try {
         const query = 'INSERT INTO Expenses(name, value, date) VALUES (?, ?, ?)';
         await db.executeSql(query, [name, value, date]);
@@ -202,7 +203,7 @@ export const createExpenses = async (db: SQLiteDatabase, name: string, value: st
  
 
  
-export const updateIncome = async (db: SQLiteDatabase, id: number, name: string, value: number, date: string) => {
+export const updateIncome = async (db: SQLiteDatabase, id: number, name: string,email:string, value: number, date: string) => {
     return new Promise<void>((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql(
@@ -215,7 +216,7 @@ export const updateIncome = async (db: SQLiteDatabase, id: number, name: string,
     });
   };
   
-  export const updateExpense = async (db: SQLiteDatabase, id: number, name: string, value: number, date: string) => {
+  export const updateExpense = async (db: SQLiteDatabase, id: number, name: string, email:string, value: number, date: string) => {
     return new Promise<void>((resolve, reject) => {
         db.transaction(tx => {
             tx.executeSql(
@@ -229,7 +230,7 @@ export const updateIncome = async (db: SQLiteDatabase, id: number, name: string,
   };
   
  
-export const deleteIncome = async (db: SQLiteDatabase, id: number) => {
+export const deleteIncome = async (db: SQLiteDatabase, id: number,email:string, ) => {
   return new Promise<void>((resolve, reject) => {
       db.transaction(tx => {
           tx.executeSql(
@@ -242,7 +243,7 @@ export const deleteIncome = async (db: SQLiteDatabase, id: number) => {
   });
 };
  
-export const deleteExpense = async (db: SQLiteDatabase, id: number) => {
+export const deleteExpense = async (db: SQLiteDatabase, id: number,email:string, ) => {
   return new Promise<void>((resolve, reject) => {
       db.transaction(tx => {
           tx.executeSql(

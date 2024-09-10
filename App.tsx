@@ -1,67 +1,53 @@
-import React from 'react';
-import { StyleSheet, TextStyle } from 'react-native';
+import React, { useState } from 'react';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import Summary from './Screens/Summary';
 import Login from './Screens/Login';
+import Logout from './Screens/Logout';
 import Register from './Screens/Register';
 import ViewExpenseIncome from './Screens/ViewExpenseIncome';
-import EditExpenseIncome from './Screens/EditExpenseIncome';
 import CreateExpenseIncome from './Screens/CreateExpenseIncome';
-import { StackParamList } from './types';
-import { getDBConnection, createIncomesTable, createExpensesTable, createUsersTable} from './db.service';
- 
-const Stack = createStackNavigator<StackParamList>();
- 
-const headerOptions: StackNavigationOptions = {
-  headerStyle: {
-    backgroundColor: '#42f584',
-  },
-  headerTintColor: '#fff',
-  headerTitleStyle: {
-    fontWeight: 'bold' as TextStyle['fontWeight'],
-  },
-  headerTitleAlign: 'center',
-};
- 
- 
-const App = () => {
+import EditExpenseIncome from './Screens/EditExpenseIncome';
+
+const Drawer = createDrawerNavigator();
+
+const App: React.FC = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+  };
+
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Summary"
-          component={Summary}
-          options={headerOptions}
-        />
-        <Stack.Screen
-          name="Login"
-          component={Login}
-          options={headerOptions}
-        />
-        <Stack.Screen
-          name="Register"
-          component={Register}
-          options={headerOptions}
-        />
-        <Stack.Screen
-          name="ViewExpenseIncome"
-          component={ViewExpenseIncome}
-          options={headerOptions}
-        />
-        <Stack.Screen
-          name="EditExpenseIncome"
-          component={EditExpenseIncome}
-          options={headerOptions}
-        />
-        <Stack.Screen
-          name="CreateExpenseIncome"
-          component={CreateExpenseIncome}
-          options={headerOptions}
-        />
-      </Stack.Navigator>
+      <Drawer.Navigator initialRouteName="Login">
+        {isLoggedIn ? (
+          <>
+            <Drawer.Screen name="Summary" component={Summary} />
+            <Drawer.Screen name="View Expense Income" component={ViewExpenseIncome} />
+            <Drawer.Screen name="Create Expense" component={CreateExpenseIncome} initialParams={{ type: 'expense' }} />
+            <Drawer.Screen name="Create Income" component={CreateExpenseIncome} initialParams={{ type: 'income' }} />
+            <Drawer.Screen name="Edit Expense Income" component={EditExpenseIncome} />
+            <Drawer.Screen name="Logout">
+              {props => <Logout {...props} onLogout={handleLogout} />}
+            </Drawer.Screen>
+          </>
+        ) : (
+          <>
+            <Drawer.Screen name="Login">
+              {props => <Login {...props} onLogin={handleLogin} />}
+            </Drawer.Screen>
+            <Drawer.Screen name="Register" component={Register} />
+            <Drawer.Screen name="Summary" component={Summary} />
+          </>
+        )}
+      </Drawer.Navigator>
     </NavigationContainer>
   );
 };
- 
+
 export default App;

@@ -5,11 +5,13 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../types';
 import { getDBConnection, createIncomes, createExpenses } from '../db.service';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useUser } from '../UserContext';
 
 type CreateExpenseIncomeNavigationProp = StackNavigationProp<StackParamList, 'CreateExpenseIncome'>;
 type CreateExpenseIncomeRouteProp = RouteProp<StackParamList, 'CreateExpenseIncome'>;
 
 const CreateExpenseIncome = () => {
+    const { email } = useUser();  // Access the user's email from the context
     const [name, setName] = useState('');
     const [value, setValue] = useState('');
     const [date, setDate] = useState(new Date());
@@ -40,9 +42,9 @@ const CreateExpenseIncome = () => {
             const formattedDate = date.toISOString().split('T')[0]; // Format date to YYYY-MM-DD
 
             if (type === 'expense') {
-                await createExpenses(db, name, parsedValue.toString(), formattedDate);
+                await createExpenses(db, email,name, parsedValue.toString(), formattedDate);
             } else if (type === 'income') {
-                await createIncomes(db, name, parsedValue.toString(), formattedDate);
+                await createIncomes(db,email,name, parsedValue.toString(), formattedDate);
             }
 
             Alert.alert('Success', 'Record created successfully!');

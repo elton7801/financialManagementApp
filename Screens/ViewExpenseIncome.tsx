@@ -4,6 +4,7 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../types';
 import { getDBConnection, getIncomes, getExpenses, deleteExpense, deleteIncome } from '../db.service';
+import { useUser } from '../UserContext';
  
 type ViewExpenseIncomeNavigationProp = StackNavigationProp<StackParamList, 'ViewExpenseIncome'>;
  
@@ -29,6 +30,7 @@ const sortByDate = (transactions: Transaction[]) => {
 };
  
 const ViewExpenseIncome: React.FC = () => {
+    const { email } = useUser(); 
     const [incomes, setIncomes] = useState<Transaction[]>([]);
     const [expenses, setExpenses] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -38,8 +40,8 @@ const ViewExpenseIncome: React.FC = () => {
     const fetchData = useCallback(async () => {
         try {
             const db = await getDBConnection();
-            const fetchedIncomes = await getIncomes(db);
-            const fetchedExpenses = await getExpenses(db);
+            const fetchedIncomes = await getIncomes(db,email);
+            const fetchedExpenses = await getExpenses(db,email);
  
             // Sort transactions by date
             const sortedIncomes = sortByDate(fetchedIncomes);
@@ -69,10 +71,10 @@ const ViewExpenseIncome: React.FC = () => {
         try {
             const db = await getDBConnection();
             if (type === 'expense') {
-                await deleteExpense(db, id);
+                await deleteExpense(db, id,email);
                 setExpenses(expenses.filter(expense => expense.id !== id));
             } else if (type === 'income') {
-                await deleteIncome(db, id);
+                await deleteIncome(db, id,email);
                 setIncomes(incomes.filter(income => income.id !== id));
             }
             Alert.alert('Success', 'Record deleted successfully!');

@@ -1,34 +1,38 @@
+// Login.tsx
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../types';
+import { useUser } from '../UserContext';
 import { getDBConnection, getUserByEmailAndPassword } from '../db.service';
-import Summary from './Summary';
-import ViewExpenseIncome from './ViewExpenseIncome';
-import EditExpenseIncome from './EditExpenseIncome';
-import CreateExpenseIncome from './CreateExpenseIncome';
 
-const Drawer = createDrawerNavigator<StackParamList>();
+type LoginScreenProp = StackNavigationProp<StackParamList, 'Login'>;
 
-type LoginScreenProp = NativeStackNavigationProp<StackParamList, 'Login'>;
+interface LoginProps {
+  navigation: LoginScreenProp;
+  onLogin: () => void; // Prop to handle login state change
+}
 
-const Login = ({ navigation }: { navigation: LoginScreenProp }) => {
-  const [email, setEmail] = useState('');
+const Login: React.FC<LoginProps> = ({ navigation, onLogin }) => {
+  const { setEmail } = useUser();  // Access the setEmail function from the context
+  const [email, setEmailInput] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'You must enter both email and password.');
       return;
+    }else{
+      setEmail(email);
     }
 
     try {
       const db = await getDBConnection();
       const user = await getUserByEmailAndPassword(db, email, password);
-      
+
       if (user) {
-        navigation.navigate('Summary');
+        onLogin(); // Update login state
+        navigation.navigate('Summary',{ resetData: false });
       } else {
         Alert.alert('Error', 'Email or password is incorrect.');
       }
@@ -39,36 +43,32 @@ const Login = ({ navigation }: { navigation: LoginScreenProp }) => {
   };
 
   return (
-    <Drawer.Navigator>
-      <Drawer.Screen name="Summary" component={Summary} />
-      <Drawer.Screen name="ViewExpenseIncome" component={ViewExpenseIncome} />
-      <Drawer.Screen name="EditExpenseIncome" component={EditExpenseIncome} />
-      <Drawer.Screen name="CreateExpenseIncome" component={CreateExpenseIncome} />
-      <Drawer.Screen name="Login">
-        {() => (
-          <View style={styles.container}>
-            <Text style={styles.title}>Login</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-            <Button title="Login" onPress={handleLogin} />
-            <Button title="Register" onPress={() => navigation.navigate('Register')} />
-          </View>
-        )}
-      </Drawer.Screen>
-    </Drawer.Navigator>
+    <View style={styles.container}>
+      <Text style={styles.title}>Login</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmailInput}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <Text style={styles.loginButtonText}>Login</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate('Register')}>
+          <Text style={styles.registerButtonText}>Register</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 
@@ -90,6 +90,36 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
+  },
+  buttonContainer: {
+    width: '100%',
+  },
+  loginButton: {
+    height: 50,
+    backgroundColor: '#007bff',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    width: '100%',
+  },
+  loginButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  registerButton: {
+    height: 50,
+    backgroundColor: '#28a745',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  registerButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

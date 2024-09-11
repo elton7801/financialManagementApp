@@ -106,6 +106,26 @@ export const createUser = async (db: SQLiteDatabase, username: string, email: st
       throw new Error('Failed to retrieve user');
     }
   };
+
+  export const getUserData = async (db: SQLiteDatabase, id: number) => {
+    try{
+        const query='ELECT username, email FROM users WHERE id = ?';
+        const result=await db.executeSql(query,[id]);
+        if (result[0].rows.length > 0) {
+            return {
+              username: result[0].rows.item(0).username,
+              email: result[0].rows.item(0).email,
+            };
+          } else {
+            throw new Error('User not found');
+    }
+    }catch(error){
+        console.error("Failed to get user"+error);
+        throw new Error("Failed to get user");
+    }
+  };
+
+
  
 export const getIncomes = async(db: SQLiteDatabase,email:string): Promise<any> => {
     try{

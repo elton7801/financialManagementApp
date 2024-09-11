@@ -1,5 +1,5 @@
 export type StackParamList = {
-  Summary: { resetData?: boolean };
+  Summary: undefined;
   Login: undefined;
   Register: undefined;
   CreateExpenseIncome: { type: 'income' | 'expense' };

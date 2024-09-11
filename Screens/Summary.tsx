@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { useNavigation, useIsFocused, RouteProp ,useRoute} from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { getDBConnection, getIncomes, getExpenses } from '../db.service';
 import { StackParamList } from '../types';
@@ -13,8 +13,11 @@ type Transaction = {
     name: string;
     value: number;
 };
- 
-const Summary: React.FC = () => {
+type SummaryProps = {
+    isLoggedIn: boolean;
+  };
+type SummaryRouteProp = RouteProp<StackParamList, 'Summary'>;
+const Summary: React.FC<SummaryProps> = ({ isLoggedIn }) => {
     const { email } = useUser(); 
     const [incomes, setIncomes] = useState<Transaction[]>([]);
     const [expenses, setExpenses] = useState<Transaction[]>([]);
@@ -24,6 +27,7 @@ const Summary: React.FC = () => {
     const [balance, setBalance] = useState<number>(0);
  
     const navigation = useNavigation<SummaryScreenNavigationProp>();
+    const route = useRoute<SummaryRouteProp>(); // Use the typed route
     const isFocused = useIsFocused(); // Hook to determine if the screen is focused
  
     const fetchData = useCallback(async () => {
@@ -49,11 +53,13 @@ const Summary: React.FC = () => {
     }, []);
  
     useEffect(() => {
-        if (isFocused) {
-            fetchData();
-        }
+            if (isFocused) {
+                fetchData();
+            }
+        
     }, [isFocused, fetchData]);
- 
+    
+
     return (
         <View style={styles.container}>
             <View style={styles.content}>

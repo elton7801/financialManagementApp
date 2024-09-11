@@ -4,6 +4,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../types';
 import { getDBConnection, createUser } from '../db.service';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Icon from 'react-native-vector-icons/MaterialIcons'; 
 
 type RegisterScreenProp = StackNavigationProp<StackParamList, 'Register'>;
 
@@ -78,7 +79,7 @@ const Register: React.FC<{ navigation: RegisterScreenProp }> = ({ navigation }) 
           editable={false}
         />
         <TouchableOpacity style={styles.dateButton} onPress={() => setShowDatePicker(true)}>
-          <Text style={styles.dateButtonText}>Select</Text>
+        <Icon name="calendar-today" size={24} color="#007bff" />
         </TouchableOpacity>
       </View>
       {showDatePicker && (
@@ -107,9 +108,12 @@ const Register: React.FC<{ navigation: RegisterScreenProp }> = ({ navigation }) 
         <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
           <Text style={styles.registerButtonText}>Register</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.loginButtonText}>Back to Login</Text>
-        </TouchableOpacity>
+        <View style={styles.loginContainer}>
+          <Text style={styles.loginText}>Already have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.loginLink}>Login here</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -123,8 +127,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 30, 
+    fontFamily: 'Poppins', 
     marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
     width: '100%',
@@ -150,7 +156,7 @@ const styles = StyleSheet.create({
   },
   dateButton: {
     height: 40,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'transparent',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -172,7 +178,7 @@ const styles = StyleSheet.create({
   },
   registerButton: {
     height: 50,
-    backgroundColor: '#28a745',
+    backgroundColor: '#007bff',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -184,18 +190,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  loginButton: {
-    height: 50,
-    backgroundColor: '#007bff',
-    borderRadius: 8,
+  loginContainer: {
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
   },
-  loginButtonText: {
-    color: '#fff',
+  loginText: {
     fontSize: 16,
+  },
+  loginLink: {
+    fontSize: 16,
+    color: '#007bff',
     fontWeight: 'bold',
+    textDecorationLine: 'underline',
   },
 });
 

@@ -1,27 +1,38 @@
-// Logout.tsx
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../types';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 type LogoutScreenProp = StackNavigationProp<StackParamList>;
 
 interface LogoutProps {
   navigation: LogoutScreenProp;
-  onLogout: () => void; // Prop to handle logout state change
+  onLogout: () => void;
 }
 
 const Logout: React.FC<LogoutProps> = ({ navigation, onLogout }) => {
   const handleLogout = () => {
-    // Clear user data or reset the state
-    onLogout(); // Update logout state
-    navigation.navigate('Summary', { resetData: true });
+    onLogout();
+    navigation.navigate('Summary');
+  };
+
+  const handleCancel = () => {
+    navigation.navigate('Summary');
   };
 
   return (
     <View style={styles.container}>
+      <Icon name="exit-to-app" size={70} color="#007bff" style={styles.icon} />
       <Text style={styles.title}>Are you sure you want to logout?</Text>
-      <Button title="Logout" onPress={handleLogout} />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.noButton} onPress={handleCancel}>
+          <Text style={styles.buttonText}>No</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.buttonText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -33,9 +44,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  title: {
-    fontSize: 18,
+  icon: {
     marginBottom: 20,
+    
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  noButton: {
+    flex: 1,
+    height: 50,
+    backgroundColor: '#007bff',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  logoutButton: {
+    flex: 1,
+    height: 50,
+    backgroundColor: '#66b3ff', 
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

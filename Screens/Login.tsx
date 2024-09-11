@@ -1,6 +1,5 @@
-// Login.tsx
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Linking } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../types';
 import { useUser } from '../UserContext';
@@ -10,7 +9,7 @@ type LoginScreenProp = StackNavigationProp<StackParamList, 'Login'>;
 
 interface LoginProps {
   navigation: LoginScreenProp;
-  onLogin: () => void; // Prop to handle login state change
+  onLogin: (userId:number) => void; 
 }
 
 const Login: React.FC<LoginProps> = ({ navigation, onLogin }) => {
@@ -18,24 +17,28 @@ const Login: React.FC<LoginProps> = ({ navigation, onLogin }) => {
   const [email, setEmailInput] = useState('');
   const [password, setPassword] = useState('');
 
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'You must enter both email and password.');
       return;
-    }else{
+    } else {
       setEmail(email);
     }
 
     try {
       const db = await getDBConnection();
       const user = await getUserByEmailAndPassword(db, email, password);
+      const userId = await getUserByEmailAndPassword(db,email, password);
 
-      if (user) {
-        onLogin(); // Update login state
-        navigation.navigate('Summary',{ resetData: false });
-      } else {
-        Alert.alert('Error', 'Email or password is incorrect.');
-      }
+      if(user){
+        if (userId) {
+          onLogin(userId); // Update login state
+          navigation.navigate('Summary');
+        } else {
+          Alert.alert('Error', 'Email or password is incorrect.');
+        }
+      }    
     } catch (error) {
       console.error('Error logging in:', error);
       Alert.alert('Error', 'Failed to log in. Please try again.');
@@ -64,9 +67,17 @@ const Login: React.FC<LoginProps> = ({ navigation, onLogin }) => {
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.registerButtonText}>Register</Text>
-        </TouchableOpacity>
+        <View style={styles.registerContainer}>
+          <Text style={styles.registerText}>
+            Do not have an account?{' '}
+            <Text
+              style={styles.registerLink}
+              onPress={() => navigation.navigate('Register')}
+            >
+              Register here.
+            </Text>
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -80,8 +91,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 36,
+    fontFamily: 'Poppins-Bold',
     marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
     width: '100%',
@@ -93,6 +106,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: '100%',
+    alignItems: 'center',
   },
   loginButton: {
     height: 50,
@@ -108,18 +122,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  registerButton: {
-    height: 50,
-    backgroundColor: '#28a745',
-    borderRadius: 8,
-    justifyContent: 'center',
+  registerContainer: {
     alignItems: 'center',
-    width: '100%',
   },
-  registerButtonText: {
-    color: '#fff',
+  registerText: {
     fontSize: 16,
+  },
+  registerLink: {
+    color: '#007bff',
     fontWeight: 'bold',
+    textDecorationLine: 'underline',
   },
 });
 

@@ -1,44 +1,39 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { StackParamList } from '../types';
-import { useUser } from '../UserContext';
-import { getDBConnection, getUserByEmailAndPassword } from '../db.service';
+import { getDBConnection, getUserByEmailAndPassword, getUserData } from '../db.service';
+import { AuthContext } from '../App'; 
 
 type LoginScreenProp = StackNavigationProp<StackParamList, 'Login'>;
 
 interface LoginProps {
   navigation: LoginScreenProp;
-  onLogin: (userId:number) => void; 
+  onLogin: (email: string, username: string,password: string) => void;
 }
 
 const Login: React.FC<LoginProps> = ({ navigation, onLogin }) => {
-  const { setEmail } = useUser();  // Access the setEmail function from the context
   const [email, setEmailInput] = useState('');
   const [password, setPassword] = useState('');
-
 
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'You must enter both email and password.');
       return;
-    } else {
-      setEmail(email);
     }
+    console.log('Attempting to login with email(Login):', email); 
 
     try {
       const db = await getDBConnection();
       const user = await getUserByEmailAndPassword(db, email, password);
-      const userId = await getUserByEmailAndPassword(db,email, password);
+      const username = await getUserData(db, email);
 
-      if(user){
-        if (userId) {
-          onLogin(userId); // Update login state
-          navigation.navigate('Summary');
-        } else {
-          Alert.alert('Error', 'Email or password is incorrect.');
-        }
-      }    
+      if (user) {
+        onLogin(email, username,password); // Update login state
+        navigation.navigate('Summary');
+      } else {
+        Alert.alert('Error', 'Email or password is incorrect.');
+      }
     } catch (error) {
       console.error('Error logging in:', error);
       Alert.alert('Error', 'Failed to log in. Please try again.');

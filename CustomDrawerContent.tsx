@@ -6,17 +6,17 @@ import { AuthContext } from './App';
 import { getDBConnection, getUserData } from './db.service'; 
 
 const CustomDrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
-  const { userId } = useContext(AuthContext);
-  const [userData, setUserData] = useState<{ username: string; email: string } | null>(null);
-  const [selectedItem, setSelectedItem] = useState<string | null>(null); // State to track the selected item
+  const { email } = useContext(AuthContext);
+  const [username, setUsername] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<string | null>(null); 
 
   useEffect(() => {
-    if (userId !== null) {
+    if (email !== null) {
       const fetchData = async () => {
         try {
           const db = await getDBConnection();
-          const data = await getUserData(db, userId); // Pass userId here
-          setUserData(data);
+          const userData = await getUserData(db, email);
+          setUsername(userData.username); 
         } catch (error) {
           console.error('Error fetching user data:', error);
         }
@@ -24,10 +24,10 @@ const CustomDrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
 
       fetchData();
     }
-  }, [userId]);
+  }, [email]);
 
   const handlePress = (routeName: string) => {
-    setSelectedItem(routeName); // Set the selected item to update the background color
+    setSelectedItem(routeName); 
     props.navigation.navigate(routeName);
   };
 
@@ -36,11 +36,8 @@ const CustomDrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
       <View style={styles.profileContainer}>
         <Icon name="account-circle" size={80} color="#007bff" style={styles.profilePic} />
         <View style={styles.profileInfo}>
-          {userData ? (
-            <>
-              <Text style={styles.username}>{userData.username}</Text>
-              <Text style={styles.email}>{userData.email}</Text>
-            </>
+          {username ? (
+            <Text style={styles.username}>{username}</Text>
           ) : (
             <Text>Loading...</Text>
           )}
@@ -52,7 +49,7 @@ const CustomDrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
             key={index}
             style={[
               styles.drawerItem,
-              selectedItem === routeName ? styles.selectedDrawerItem : null, // Apply different style when selected
+              selectedItem === routeName ? styles.selectedDrawerItem : null, 
             ]}
             onPress={() => handlePress(routeName)}
           >
@@ -78,6 +75,8 @@ const CustomDrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
 const styles = StyleSheet.create({
   container: { 
     flex: 1,
+    paddingHorizontal: 20, 
+    paddingBottom:10,
   },
   profileContainer: { 
     flexDirection: 'row', 
@@ -96,10 +95,6 @@ const styles = StyleSheet.create({
     fontSize: 18, 
     fontWeight: 'bold' 
   },
-  email: { 
-    fontSize: 14, 
-    color: '#666' 
-  },
   drawerItems: { 
     flex: 1, 
     paddingTop: 10 
@@ -107,18 +102,17 @@ const styles = StyleSheet.create({
   drawerItem: { 
     padding: 15,
     paddingLeft: 20,
-    borderRadius: 10, 
+    borderRadius: 10,
     marginVertical: 5, 
     backgroundColor: 'transparent',
     width: '90%', 
     alignSelf: 'center', 
   },
   selectedDrawerItem: { 
-    backgroundColor: '#d0e0ff' // Background color when selected
+    backgroundColor: '#d0e0ff',
   },
   drawerItemText: { 
-    fontSize: 18 
+    fontSize: 18 ,
   },
-});
-
+})
 export default CustomDrawerContent;

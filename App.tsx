@@ -18,8 +18,9 @@ const Stack = createStackNavigator();
 // Auth context
 export const AuthContext = createContext({
   isLoggedIn: false,
-  userId: null as number | null,
-  login: (id: number) => {},
+  email: null as string | null,
+  username: null as string | null,
+  login: (email: string, username: string) => {},
   logout: () => {},
 });
 
@@ -70,25 +71,28 @@ const NotLoggedInStackNavigator: React.FC = () => {
 // Main App Component
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [userId, setUserId] = useState<number | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
-  const login = () => {
+  const login = (email: string, username: string) => {
     setIsLoggedIn(true);
-    setUserId(userId);
+    setEmail(email);
+    setUsername(username);
   };
 
   const logout = () => {
     setIsLoggedIn(false);
-    setUserId(null);
+    setEmail(null);
+    setUsername(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn,userId ,login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn,email ,username, login, logout }}>
       <NavigationContainer>
         {isLoggedIn ? <LoggedInDrawerNavigator /> : <NotLoggedInStackNavigator />}
       </NavigationContainer>
     </AuthContext.Provider>
   );
-};
+}
 
 export default App;

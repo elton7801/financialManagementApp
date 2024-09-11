@@ -107,24 +107,20 @@ export const createUser = async (db: SQLiteDatabase, username: string, email: st
     }
   };
 
-  export const getUserData = async (db: SQLiteDatabase, id: number) => {
-    try{
-        const query='ELECT username, email FROM users WHERE id = ?';
-        const result=await db.executeSql(query,[id]);
+  export const getUserData = async (db: SQLiteDatabase, email: string) => {
+    try {
+        const query = 'SELECT username FROM User WHERE email = ?';
+        const result = await db.executeSql(query, [email]);
         if (result[0].rows.length > 0) {
-            return {
-              username: result[0].rows.item(0).username,
-              email: result[0].rows.item(0).email,
-            };
-          } else {
+            return result[0].rows.item(0); // Return only the username
+        } else {
             throw new Error('User not found');
+        }
+    } catch (error) {
+        console.error('Failed to get user data:', error);
+        throw new Error('Failed to get user data');
     }
-    }catch(error){
-        console.error("Failed to get user"+error);
-        throw new Error("Failed to get user");
-    }
-  };
-
+};
 
  
 export const getIncomes = async(db: SQLiteDatabase,email:string): Promise<any> => {

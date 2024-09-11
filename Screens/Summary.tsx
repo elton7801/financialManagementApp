@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { useIsFocused, useRoute, RouteProp } from '@react-navigation/native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { getDBConnection, getIncomes, getExpenses } from '../db.service';
-import { StackParamList } from '../types'; // Import your stack types
+import { StackParamList } from '../types';
 import { useUser } from '../UserContext';
-
+ 
+type SummaryScreenNavigationProp = StackNavigationProp<StackParamList, 'CreateExpenseIncome'>;
+ 
 type Transaction = {
     id: number;
     name: string;
     value: number;
 };
-
-type SummaryRouteProp = RouteProp<StackParamList, 'Summary'>;
-
+ 
 const Summary: React.FC = () => {
     const { email } = useUser(); 
     const [incomes, setIncomes] = useState<Transaction[]>([]);
@@ -21,22 +22,22 @@ const Summary: React.FC = () => {
     const [totalIncomes, setTotalIncomes] = useState<number>(0);
     const [totalExpenses, setTotalExpenses] = useState<number>(0);
     const [balance, setBalance] = useState<number>(0);
-
-    const route = useRoute<SummaryRouteProp>(); // Use the typed route
+ 
+    const navigation = useNavigation<SummaryScreenNavigationProp>();
     const isFocused = useIsFocused(); // Hook to determine if the screen is focused
-
+ 
     const fetchData = useCallback(async () => {
         try {
             const db = await getDBConnection();
             const fetchedIncomes = await getIncomes(db,email);
             const fetchedExpenses = await getExpenses(db,email);
-
+ 
             setIncomes(fetchedIncomes);
             setExpenses(fetchedExpenses);
-
+ 
             const totalIncomeAmount = fetchedIncomes.reduce((sum: number, item: Transaction) => sum + item.value, 0);
             const totalExpenseAmount = fetchedExpenses.reduce((sum: number, item: Transaction) => sum + item.value, 0);
-
+            
             setTotalIncomes(totalIncomeAmount);
             setTotalExpenses(totalExpenseAmount);
             setBalance(totalIncomeAmount - totalExpenseAmount);
@@ -46,24 +47,18 @@ const Summary: React.FC = () => {
             setLoading(false);
         }
     }, []);
-
+ 
     useEffect(() => {
-        if (route.params?.resetData) {
-            setIncomes([]); // Clear incomes
-            setExpenses([]); // Clear expenses
-            setTotalIncomes(0);
-            setTotalExpenses(0);
-            setBalance(0);
-        } else if (isFocused) {
+        if (isFocused) {
             fetchData();
         }
-    }, [isFocused, fetchData, route.params?.resetData]);
-
+    }, [isFocused, fetchData]);
+ 
     return (
         <View style={styles.container}>
             <View style={styles.content}>
                 <Text style={styles.title}>Monthly Summary</Text>
-
+ 
                 {loading ? (
                     <ActivityIndicator size="large" color="#0000ff" />
                 ) : (
@@ -71,25 +66,42 @@ const Summary: React.FC = () => {
                         <View style={styles.summaryBox}>
                             <Text style={styles.subtitle}>Total Incomes</Text>
                             <Text style={styles.totalAmount}>${totalIncomes.toFixed(2)}</Text>
-
+ 
                             <Text style={styles.subtitle}>Total Expenses</Text>
                             <Text style={styles.totalAmount}>${totalExpenses.toFixed(2)}</Text>
                         </View>
-
-                        <View
+ 
+                        <TouchableOpacity
                             style={[styles.balanceBox, { backgroundColor: balance >= 0 ? 'green' : 'red' }]}
+                            onPress={() => navigation.navigate('ViewExpenseIncome')}
                         >
                             <Text style={styles.balanceText}>
                                 Total Balance: ${balance.toFixed(2)}
                             </Text>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                 )}
+            </View>
+            
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => navigation.navigate('CreateExpenseIncome', { type: 'expense' })}
+                >
+                    <Text style={styles.buttonText}>Add Expense</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => navigation.navigate('CreateExpenseIncome', { type: 'income' })}
+                >
+                    <Text style={styles.buttonText}>Add Income</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
 };
-
+ 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -116,6 +128,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 16,
     },
+    item: {
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+    },
     balanceBox: {
         marginVertical: 16,
         paddingVertical: 20,
@@ -129,6 +146,27 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#fff',
     },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderTopWidth: 1,
+        borderTopColor: '#ccc',
+    },
+    button: {
+        backgroundColor: '#007bff',
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 5,
+        flex: 1,
+        marginHorizontal: 5,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 16,
+        textAlign: 'center',
+    },
 });
-
+ 
 export default Summary;

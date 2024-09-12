@@ -63,7 +63,7 @@ const Summary: React.FC<SummaryProps> = ({ isLoggedIn }) => {
     return (
         <View style={styles.container}>
             <View style={styles.content}>
-                <Text style={styles.title}>Monthly Summary</Text>
+                <Text style={styles.title}>Summary</Text>
  
                 {loading ? (
                     <ActivityIndicator size="large" color="#0000ff" />

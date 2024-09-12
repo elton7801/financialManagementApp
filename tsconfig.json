@@ -1,6 +1,13 @@
 {
   "compilerOptions": {
-      "jsx": "react"
+    "target": "ES6",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
-  "extends": "@react-native/typescript-config/tsconfig.json"
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }

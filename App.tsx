@@ -41,17 +41,18 @@ const LoggedInStackNavigator: React.FC = () => {
   );
 };
 
-// Drawer Navigator for Logged-In State
 const LoggedInDrawerNavigator: React.FC = () => (
   <Drawer.Navigator
     initialRouteName="Summary"
-    drawerContent={(props) => <CustomDrawerContent {...props} />}>
+    drawerContent={(props) => <CustomDrawerContent {...props} />}
+  >
     <Drawer.Screen name="Summary" component={LoggedInStackNavigator} />
     <Drawer.Screen name="View Expense Income" component={ViewExpenseIncome} />
     <Drawer.Screen name="Create Expense" component={CreateExpenseIncome} initialParams={{ type: 'expense' }} />
     <Drawer.Screen name="Create Income" component={CreateExpenseIncome} initialParams={{ type: 'income' }} />
   </Drawer.Navigator>
 );
+
 
 // Stack Navigator for Not Logged-In State
 const NotLoggedInStackNavigator: React.FC = () => {

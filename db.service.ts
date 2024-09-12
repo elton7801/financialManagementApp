@@ -1,6 +1,9 @@
 import {SQLiteDatabase, enablePromise, openDatabase} from 'react-native-sqlite-storage';
+
  
 const databaseName = 'FinancialDb';
+const serverPath = 'http://127.0.0.1';
+const db = openDatabase({ name: databaseName });
  
 enablePromise(true);
 

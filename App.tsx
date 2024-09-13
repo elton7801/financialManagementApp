@@ -64,7 +64,6 @@ const NotLoggedInStackNavigator: React.FC = () => {
         {props => <Login {...props} onLogin={login} />}
       </Stack.Screen>
       <Stack.Screen name="Register" component={Register} />
-      <Stack.Screen name="Summary" component={Summary} />
     </Stack.Navigator>
   );
 };
